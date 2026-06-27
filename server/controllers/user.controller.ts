@@ -8,12 +8,17 @@ import ejs from "ejs";
 import path from "node:path";
 import sendMail from "../utils/sendMail";
 import { sendToken } from "../utils/jwt";
+import { redis } from "../utils/redis";
 
 interface IRegiterationBody {
   name: string;
   email: string;
   password: string;
   avatar?: string;
+}
+
+interface IAccessTokenPayload {
+  id: string;
 }
 
 export const registerationUser = CatchAsyncError(
@@ -151,14 +156,38 @@ export const loginUser = CatchAsyncError(
 export const logoutUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const accessToken = req.cookies.accessToken;
+
+      if (!accessToken) {
+        return next(
+          new ErrorHandler("Please login to access this resource", 401),
+        );
+      }
+
+      const decoded = jwt.verify(
+        accessToken,
+        process.env.ACCESS_TOKEN as string,
+      ) as IAccessTokenPayload;
+
+      const userId = decoded?.id?.toString();
+
+      if (!userId) {
+        return next(new ErrorHandler("Access token is invalid", 401));
+      }
+
       const cookieOptions = {
         httpOnly: true,
         sameSite: "lax" as const,
         ...(process.env.NODE_ENV === "production" && { secure: true }),
       };
 
+      await redis.del(userId);
+
       res.clearCookie("accessToken", cookieOptions);
       res.clearCookie("refreshToken", cookieOptions);
+
+      redis.del(userId);
+
       res.status(200).json({
         success: true,
         message: "Logged out successfully",
