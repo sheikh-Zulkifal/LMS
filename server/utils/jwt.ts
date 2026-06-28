@@ -11,15 +11,7 @@ interface ITokenOptions {
   sameSite: "strict" | "lax" | "none";
 }
 
-export const sendToken = (user: IUser, statusCode: number, res: Response) => {
-  const accessToken = user.SignAccessToken();
-  const refreshToken = user.SignRefreshToken();
-
-  // upload session to redis
-
-  redis.set(user._id.toString(), JSON.stringify(user) as any);
-
-  // parse environment variables to integrate with fallback values
+ // parse environment variables to integrate with fallback values
   const accessTokenExpires = parseInt(
     process.env.ACCESS_TOKEN_EXPIRE || "300",
     10,
@@ -29,19 +21,29 @@ export const sendToken = (user: IUser, statusCode: number, res: Response) => {
     10,
   );
 
-  const accessTokenOptions: ITokenOptions = {
-    expires: new Date(Date.now() + accessTokenExpires * 1000),
-    maxAge: accessTokenExpires * 1000,
+  export const accessTokenOptions: ITokenOptions = {
+    expires: new Date(Date.now() + accessTokenExpires * 60 * 60 * 1000),
+    maxAge: accessTokenExpires * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: "lax",
   };
 
-  const refreshTokenOptions: ITokenOptions = {
-    expires: new Date(Date.now() + refreshTokenExpires * 1000),
-    maxAge: refreshTokenExpires * 1000,
+  export const refreshTokenOptions: ITokenOptions = {
+    expires: new Date(Date.now() + refreshTokenExpires * 24 * 60 * 60 * 1000),
+    maxAge: refreshTokenExpires * 24 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: "lax",
   };
+
+export const sendToken = (user: IUser, statusCode: number, res: Response) => {
+  const accessToken = user.SignAccessToken();
+  const refreshToken = user.SignRefreshToken();
+
+  // upload session to redis
+
+  redis.set(user._id.toString(), JSON.stringify(user) as any);
+
+ 
 
   // only secure to true in production
   if (process.env.NODE_ENV === "production") {
