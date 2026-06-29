@@ -436,14 +436,6 @@ export const updateProfilePicture = CatchAsyncError(
         user,
       });
     } catch (error: any) {
-      if (error?.http_code === 403) {
-        return next(
-          new ErrorHandler(
-            "Cloudinary authentication failed. Check CLOUD_NAME, CLOUD_API_KEY, and CLOUD_SECRET_KEY in .env",
-            403,
-          ),
-        );
-      }
       return next(new ErrorHandler(error.message, 400));
     }
   },
