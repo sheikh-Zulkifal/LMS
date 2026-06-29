@@ -1,7 +1,7 @@
-import {app} from './app';
-import connectDB from './utils/db';
-
-require('dotenv').config();
+require("dotenv").config();
+import { app } from "./app";
+import connectDB from "./utils/db";
+import "./utils/cloudinary";
 
 const PORT = process.env.PORT ;
 app.listen(PORT, () => {
