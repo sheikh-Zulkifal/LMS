@@ -4,11 +4,12 @@ import ErrorHandler from "../utils/ErrorHandler";
 import { CatchAsyncError } from "../middleware/catchAsyncErrors";
 import { redis } from "../utils/redis";
 import cloudinary from "../utils/cloudinary";
-import { createCourse } from "../services/course.service";
+import { createCourse, getAllCoursesService } from "../services/course.service";
 import CourseModel from "../models/course.model";
 import userModel from "../models/user.model";
 import mongoose from "mongoose";
 import sendMail from "../utils/sendMail";
+import NotificationModel from "../models/notification.model";
 
 // upload course
 export const uploadCourse = CatchAsyncError(
@@ -196,6 +197,13 @@ export const addQuestion = CatchAsyncError(
       };
       // add this question to the course content
       courseContent?.questions.push(newQuestion);
+
+      await NotificationModel.create({
+        user: req.user?._id,
+        title: "New Question Received",
+        message: `You have a new question in ${courseContent.title}`,
+      });
+
       // save the updated course content
       await course?.save();
       res.status(200).json({
@@ -255,7 +263,12 @@ export const addAnswer = CatchAsyncError(
       const questionUserId = question.user?.toString();
 
       if (req.user?._id?.toString() === questionUserId) {
-        // answerer is the same user who asked the question
+
+        await NotificationModel.create({
+          user: req.user?._id,
+          title: "New Question Reply Received",
+        message: `You have a new question reply in ${courseContent?.title}`,
+        });
       } else {
         const questionUser = await userModel.findById(question.user);
 
@@ -394,6 +407,19 @@ export const addReplyToReview = CatchAsyncError(
       });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
+    }
+  },
+);
+
+
+// get all Courses --only for admin
+
+export const getAllCoursesAdmin = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+     getAllCoursesService(res);
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
     }
   },
 );
