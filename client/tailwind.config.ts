@@ -11,7 +11,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         Poppins: ["var(--font-Poppins)"],
-        Josefin: ["var(--font-Josefin)"],
+        Josefin: ["var(--font-Josefin_Sans)"],
         Cursive: ["var(--font-Cursive)"],
       },
       backgroundImage: {
