@@ -81,7 +81,7 @@ interface IActivationToken {
 }
 
 export const createActivationToken = (user: any): IActivationToken => {
-  const activationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const activationCode = Math.floor(1000 + Math.random() * 9000).toString();
   const token = jwt.sign(
     { user, activationCode },
     process.env.ACTIVATION_SECRET,
@@ -102,14 +102,14 @@ interface IActivateUserRequest {
 export const activateUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { activationToken, activationCode } =
+      const { activation_token, activation_code } =
         req.body as IActivateUserRequest;
       const newUser: { user: IUser; activationCode: string } = jwt.verify(
-        activationToken,
+        activation_token,
         process.env.ACTIVATION_SECRET as string,
       ) as { user: IUser; activationCode: string };
 
-      if (newUser.activationCode !== activationCode) {
+      if (newUser.activationCode !== activation_code) {
         return next(new ErrorHandler("Invalid activation code", 400));
       }
       const { name, email, password } = newUser.user;
@@ -213,6 +213,11 @@ export const updateAccessToken = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const refresh_token = req.cookies.refreshToken as string;
+
+      if (!refresh_token) {
+        return next(new ErrorHandler("Could not refresh token", 401));
+      }
+
       const decoded = jwt.verify(
         refresh_token,
         process.env.REFRESH_TOKEN as string,
@@ -246,14 +251,15 @@ export const updateAccessToken = CatchAsyncError(
         },
       );
       res.user = user;
-      res.cookie("access_token", accessToken, accessTokenOptions);
-      res.cookie("refresh_token", refreshToken, refreshTokenOptions);
+      res.cookie("accessToken", accessToken, accessTokenOptions);
+      res.cookie("refreshToken", refreshToken, refreshTokenOptions);
 
-      await redis.set(user._id, JSON.stringify(user), "EX", 7*24*60*60 ); //7d
+      await redis.set(user._id, JSON.stringify(user), "EX", 7 * 24 * 60 * 60);
 
       res.status(200).json({
-        status: "success",
+        success: true,
         accessToken,
+        user,
       });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));

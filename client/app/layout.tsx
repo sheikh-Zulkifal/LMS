@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+"use client"
 import { Poppins, Josefin_Sans} from "next/font/google";
 import "./globals.css";
 import {ThemeProvider} from "./utils/theme-provider";
 import { Toaster } from "react-hot-toast";
+import { Providers } from "./Provider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,10 +26,12 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         suppressHydrationWarning
         className={`${poppins.variable} ${josefin.variable} !bg-white dark:bg-gradient-to-b bg-no-repeat dark:from-gray-900 dark:to-black duration-300 `}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <Providers>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
           <Toaster position="top-center" reverseOrder={false} />
         </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

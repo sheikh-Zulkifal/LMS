@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -10,6 +10,8 @@ import {
 } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import { style } from "../../../app/styles/style";
+import { useLoginMutation } from "../../../redux/features/auth/authApi";
+import toast from "react-hot-toast";
 
 type Props = {
   setOpen?: (open: boolean) => void;
@@ -23,16 +25,31 @@ const schema = Yup.object().shape({
   password: Yup.string().required("Please enter your Password").min(6),
 });
 
-const Login: FC<Props> = ({ setRoute }) => {
+const Login: FC<Props> = ({ setRoute, setOpen }) => {
   const [show, setShow] = useState(false);
+
+  const [login, { isSuccess, error, data }] = useLoginMutation();
 
   const formik = useFormik({
     initialValues: { email: "", password: "" },
     validationSchema: schema,
     onSubmit: async ({ email, password }) => {
-      console.log(email, password);
+      await login({ email, password });
     },
   });
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Login successful!");
+      setOpen(false);
+    }
+    if (error) {
+      if ("data" in error) {
+        const errorData = error as any;
+        toast.error(errorData.data.message);
+      }
+    }
+  }, [isSuccess, error]);
 
   const { errors, touched, values, handleChange, handleSubmit } = formik;
 
@@ -101,7 +118,7 @@ const Login: FC<Props> = ({ setRoute }) => {
           <AiFillGithub size={30} className="cursor-pointer ml-2" />
         </div>
         <h5 className="text-black dark:text-white text-center pt-4 font-Poppins text-[14px]">
-        Not have any account?
+          Not have any account?
           <span
             className="text-[#2190ff] pl-1 cursor-pointer"
             onClick={() => setRoute?.("Sign-Up")}
