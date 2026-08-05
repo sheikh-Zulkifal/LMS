@@ -16,6 +16,7 @@
     "@teispace/next-themes": "^2.0.4",
     "formik": "^2.4.9",
     "next": "16.2.10",
+    "next-auth": "^4.24.15",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hot-toast": "^2.6.0",
