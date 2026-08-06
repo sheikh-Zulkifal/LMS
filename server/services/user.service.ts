@@ -5,13 +5,25 @@ import userModel from "../models/user.model";
 //  get user id
 export const getUserById = async (id: string, res: Response) => {
   const userJson = await redis.get(id);
-  if (userJson) {
-    const user = JSON.parse(userJson);
-    res.status(200).json({
-      success: true,
-      user,
+
+  // fall back to the database so a missing/expired cache never hangs the request
+  const user = userJson ? JSON.parse(userJson) : await userModel.findById(id);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
     });
   }
+
+  if (!userJson) {
+    await redis.set(id, JSON.stringify(user), "EX", 7 * 24 * 60 * 60);
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
 };
 
 //  Get All Users

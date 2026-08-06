@@ -10,7 +10,7 @@ interface ProviderProps {
 }
 
 function RefreshTokenLoader() {
-  useRefreshTokenQuery();
+  useRefreshTokenQuery(undefined);
   return null;
 }
 

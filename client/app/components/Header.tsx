@@ -8,7 +8,7 @@ import { HiOutlineMenuAlt3, HiOutlineUserCircle } from "react-icons/hi";
 import CustomModal from "../utils/CustomModal";
 import Login from "./Auth/Login";
 import SignUp from "./Auth/SignUp";
-import Verification from "./Auth/Verification.tsx";
+import Verification from "./Auth/Verification";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 import avatar from "../../public/assets/avatar.png";
@@ -97,11 +97,23 @@ const Header: FC<Props> = ({ activeItem, open, setOpen, route, setRoute }) => {
                   onClick={() => setOpenSidebar(true)}
                 />
               </div>
-              <HiOutlineUserCircle
-                size={25}
-                className="hidden 800px:block cursor-pointer dark:text-white text-black"
-                onClick={handleOpenLogin}
-              />
+              {user ? (
+                <Link href="/profile" className="hidden 800px:block">
+                  <Image
+                    src={user?.avatar?.url || avatar}
+                    alt=""
+                    width={30}
+                    height={30}
+                    className="w-[30px] h-[30px] rounded-full cursor-pointer object-cover"
+                  />
+                </Link>
+              ) : (
+                <HiOutlineUserCircle
+                  size={25}
+                  className="hidden 800px:block cursor-pointer dark:text-white text-black"
+                  onClick={handleOpenLogin}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -118,9 +130,11 @@ const Header: FC<Props> = ({ activeItem, open, setOpen, route, setRoute }) => {
             {user ? (
               <Link href="/profile">
                 <Image
-                  src={user?.avatar ? user?.avatar : avatar}
+                  src={user?.avatar?.url || avatar}
                   alt=" "
-                  className="w-[30px] h-[30px] rounded-full cursor-pointer"
+                  width={30}
+                  height={30}
+                  className="w-[30px] h-[30px] rounded-full cursor-pointer object-cover"
                 />
               </Link>
             ) : (

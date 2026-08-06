@@ -6,11 +6,12 @@ import { Modal, Box } from "@mui/material";
 type Props = {
   open: boolean;
   setOpen: (open: boolean) => void;
+  activeItem?: number;
   component: React.ComponentType<{
-    setOpen?: (open: boolean) => void;
-    setRoute?: (route: string) => void;
+    setOpen: (open: boolean) => void;
+    setRoute: (route: string) => void;
   }>;
-  setRoute?: (route: string) => void;
+  setRoute: (route: string) => void;
 };
 
 const CustomModal = ({
